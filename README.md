@@ -9,6 +9,7 @@ A Mac app for arborist expert reports. Each case is a real folder that holds its
         Case data/case.json                                           the app's record of the case
         Case data/appraisal-<id>.json                                 an appraisal filed in the case
         Case data/report.json                                         the written report (the document, the version before the last rebuild, questions from the draft)
+        Case data/report-v2.json, report-v3.json                      Versions 2 and 3 of the report, same layout (Version 1 is report.json)
         Removed files/                                                where a file goes when it is removed in the app
 
 The user chooses the cases folder the first time they start a case. Anything dropped into a case folder in Finder shows up in the app.
@@ -53,6 +54,10 @@ The user chooses the cases folder the first time they start a case. Anything dro
     python3 ExpertReport/dev/test-ai-client.py
 
 Preview in a browser with the `expert-report` launch configuration (`python3 ExpertReport/dev/serve.py 8830`). The preview keeps its data in `dev/.data`, separate from the real app.
+
+## Report versions
+
+The Report tab has three versions of the report for each case (Version 1, 2 and 3), picked from the bar above the editor. Each is a separate document with its own draft, questions and "go back" copy: Version 1 is `Case data/report.json` (so reports written before versions existed are Version 1 unchanged), Versions 2 and 3 are `report-v2.json` and `report-v3.json`. An empty version can start from the outline, a Claude draft, or a copy of another version. `W.docs[caseId]` in `write.js` always holds the version on screen (`W.ver[caseId]`), so drafting, the assistant and the exports work on that one; a PDF or Pages file from Version 2 or 3 has "Version N" in its name. Switching saves the version on screen first.
 
 ## Drafting with Claude
 

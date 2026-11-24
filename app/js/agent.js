@@ -207,7 +207,7 @@
   }
   function snapshot() {
     const cr = rec(), ap = S.route.view === 'appraisal' ? S.appraisals[S.route.id] : null, s = { caseId: cr ? cr.doc.id : null, aps: {}, apIds: Object.keys(S.appraisals) };
-    if (cr) { s.doc = JSON.stringify(cr.doc); C.caseAppraisals(cr.doc).forEach(a => { s.aps[a.id] = JSON.stringify(a); }); s.report = WU.W.docs[cr.doc.id] ? JSON.stringify(WU.W.docs[cr.doc.id]) : null; }
+    if (cr) { s.doc = JSON.stringify(cr.doc); C.caseAppraisals(cr.doc).forEach(a => { s.aps[a.id] = JSON.stringify(a); }); s.report = WU.W.docs[cr.doc.id] ? JSON.stringify(WU.W.docs[cr.doc.id]) : null; s.ver = WU.verOf(cr.doc.id); }
     if (ap) s.aps[ap.id] = JSON.stringify(ap);
     return s;
   }
@@ -215,7 +215,8 @@
     const s = G.snap; if (!s || G.busy) return;
     Object.keys(S.appraisals).forEach(id => { if (s.apIds.indexOf(id) < 0) { const cid = S.apHome[id]; delete S.appraisals[id]; delete S.apHome[id]; if (cid && S.cases[cid]) Host.call('caseRemove', { path: S.cases[cid].path, name: 'appraisal-' + id }); if (S.route.view === 'appraisal' && S.route.id === id) S.route = cid ? { view: 'case', id: cid, tab: 'appraisal' } : { view: 'home' }; } });
     Object.keys(s.aps).forEach(id => { S.appraisals[id] = JSON.parse(s.aps[id]); A.save('appraisals', id, 0); });
-    if (s.caseId && S.cases[s.caseId]) { S.cases[s.caseId].doc = JSON.parse(s.doc); A.save('cases', s.caseId, 0); if (s.report) { WU.W.docs[s.caseId] = JSON.parse(s.report); WU.dropPage(s.caseId); WU.saveDoc(s.caseId, 0); } else if (WU.W.docs[s.caseId]) { WU.W.docs[s.caseId] = null; WU.dropPage(s.caseId); Host.call('caseRemove', { path: S.cases[s.caseId].path, name: 'report' }); } }
+    if (s.caseId && S.cases[s.caseId]) { S.cases[s.caseId].doc = JSON.parse(s.doc); A.save('cases', s.caseId, 0); if (s.ver && WU.verOf(s.caseId) !== s.ver) { const p = S.cases[s.caseId].path, n = WU.docName(s.caseId, s.ver); Host.call(s.report ? 'casePut' : 'caseRemove', s.report ? { path: p, name: n, doc: JSON.parse(s.report) } : { path: p, name: n }); }   // another report version is on screen now: put back the one that was changed
+      else if (s.report) { WU.W.docs[s.caseId] = JSON.parse(s.report); WU.dropPage(s.caseId); WU.saveDoc(s.caseId, 0); } else if (WU.W.docs[s.caseId]) { WU.W.docs[s.caseId] = null; WU.dropPage(s.caseId); Host.call('caseRemove', { path: S.cases[s.caseId].path, name: WU.docName(s.caseId) }); } }
     G.snap = null; G.log.push({ who: 'note', text: 'Those changes were undone.' });
     G.msgs.push({ role: 'user', content: [{ type: 'text', text: '[The arborist pressed Undo: every change you made in answer to their last request has been reversed. Look again before relying on anything.]' }] }, { role: 'assistant', content: [{ type: 'text', text: 'Understood.' }] });
     A.render(); paint();
