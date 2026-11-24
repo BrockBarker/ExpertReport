@@ -1,24 +1,36 @@
 /* Expert Report: the Report tab. A word processor for the case's report.
  * The first version is generated from the case, optionally drafted by Claude from the photos, emails and notes;
- * after that the arborist edits it here. The document is saved in the case folder (Case data/report.json). */
+ * after that the arborist edits it here. The document is saved in the case folder (Case data/report.json).
+ * A case can hold three versions of its report: Version 1 is report.json, Versions 2 and 3 are report-v2.json and report-v3.json.
+ * W.docs[caseId] is always the version on screen (W.ver[caseId]), so everything else works on that one. */
 (function () {
   'use strict';
   const A = App, S = A.S, $ = A.$, $$ = A.$$, esc = A.esc, toast = A.toast, plural = A.plural, C = CaseUI, CR = CaseReport;
-  const W = { docs: {}, state: {}, dirty: {}, timer: null, checkTimer: null, busy: null };
+  const W = { docs: {}, state: {}, dirty: {}, ver: {}, have: {}, timer: null, checkTimer: null, busy: null };
   const MODELS = [['claude-opus-5-5', 'Claude Opus 5.5'], ['claude-fable-5-2', 'Claude Fable 5.2 (most capable, costs more)'], ['claude-sonnet-5-5', 'Claude Sonnet 5.5 (faster, costs less)']];
   const PRICE = { 'claude-opus-5-5': [4, 20], 'claude-fable-5-2': [8, 40], 'claude-sonnet-5-5': [2, 10] }; // dollars per million tokens, in and out
 
   const modelName = id => { const m = MODELS.find(x => x[0] === id); return m ? m[1].replace(/ \(.*$/, '') : id || 'Claude'; };
+  const VERSIONS = [1, 2, 3];
+  const verOf = id => W.ver[id] || 1;
+  const docName = (id, v) => { v = v || verOf(id); return v === 1 ? 'report' : 'report-v' + v; };
   const ctxFor = (c, r) => ({ path: r.path, files: C.filesOf(c), photos: C.photosIn(c), appraisals: C.caseAppraisals(c).filter(a => !(c.apOut && c.apOut[a.id])), settings: S.settings, ratings: S.ratings, sheets: S.sheets });
   function load(id) {
-    const r = S.cases[id]; W.state[id] = 'loading';
-    Host.call('caseGet', { path: r.path, name: 'report' }).then(d => { W.docs[id] = d && typeof d.html === 'string' ? d : null; W.state[id] = 'ready'; }, () => { W.docs[id] = null; W.state[id] = 'ready'; })
-      .then(() => { if (S.route.view === 'case' && S.route.id === id && S.route.tab === 'report') A.render(); });
+    const r = S.cases[id], v = verOf(id); W.state[id] = 'loading';
+    Promise.all([Host.call('caseGet', { path: r.path, name: docName(id, v) }).catch(() => null), Host.call('caseNames', { path: r.path, prefix: 'report' }).catch(() => [])])
+      .then(got => {
+        if (verOf(id) !== v) return;   // the user picked another version while this one was opening
+        const d = got[0]; W.docs[id] = d && typeof d.html === 'string' ? d : null;
+        W.have[id] = {}; (got[1] || []).forEach(n => { const m = /^report(?:-v(\d))?$/.exec(n); if (m) W.have[id][+(m[1] || 1)] = true; });
+        W.state[id] = 'ready';
+        if (S.route.view === 'case' && S.route.id === id && S.route.tab === 'report') A.render();
+      });
   }
   function putDoc(id) {
     const r = S.cases[id], d = W.docs[id]; delete W.dirty[id]; if (!r || !d) return Promise.resolve();
     d.updatedAt = Date.now();
-    return Host.call('casePut', { path: r.path, name: 'report', doc: d }).then(() => setNote('Saved in the case folder'), e => { W.dirty[id] = 1; setNote('Not saved: ' + (e.message || e)); });
+    const v = verOf(id);
+    return Host.call('casePut', { path: r.path, name: docName(id, v), doc: d }).then(() => { (W.have[id] = W.have[id] || {})[v] = true; setNote('Saved in the case folder'); }, e => { W.dirty[id] = 1; setNote('Not saved: ' + (e.message || e)); });
   }
   function flushDocs() { clearTimeout(W.timer); return Promise.all(Object.keys(W.dirty).map(putDoc)); }
   function saveDoc(id, ms) { W.dirty[id] = 1; clearTimeout(W.timer); W.timer = setTimeout(flushDocs, ms === undefined ? 700 : ms); }
@@ -58,21 +70,31 @@
   function sync() { const ed = $('#ed'), r = C.rec(); if (ed && r && W.docs[r.doc.id] && ed.dataset.caseId === r.doc.id && ed.childNodes.length) W.docs[r.doc.id].html = serialize(ed); }
 
   // ---------- the tab ----------
+  function versionBar(c) {
+    const v = verOf(c.id), known = W.have[c.id], has = n => (known && known[n]) || (n === v && !!W.docs[c.id]);
+    return '<div class="row" style="margin-bottom:12px;gap:12px;align-items:center"><div class="seg" role="group" aria-label="Report version">' +
+      VERSIONS.map(n => '<button type="button" data-act="doc-ver" data-v="' + n + '" aria-pressed="' + (n === v) + '"' + (W.busy ? ' disabled' : '') + '>Version ' + n + (known && !has(n) ? ' <span style="font-weight:400;opacity:.7">(empty)</span>' : '') + '</button>').join('') +
+      '</div><span class="hint">Each version is its own report for this case, saved separately in the case folder.</span></div>';
+  }
+  function copyOffer(c) {
+    const v = verOf(c.id), others = VERSIONS.filter(n => n !== v && W.have[c.id] && W.have[c.id][n]);
+    return others.length ? '<div class="row" style="margin-top:10px;gap:8px;align-items:center"><span class="hint">Or start from a copy of</span>' + others.map(n => '<button class="btn" data-act="doc-copy" data-v="' + n + '">Version ' + n + '</button>').join('') + '</div>' : '';
+  }
   function checksHTML(c, r) {
     const d = W.docs[c.id], list = CR.checks(c, ctxFor(c, r), d ? d.html : null);
     return '<ul class="checks">' + (list.length ? list.map(k => '<li data-l="' + k.level + '">' + esc(k.text) + '</li>').join('') : '<li class="ok">Nothing missing and nothing flagged.</li>') + '</ul>';
   }
   C.TAB.report = function (c, r) {
-    if (!W.state[c.id]) { load(c.id); return '<p class="hint">Opening the report…</p>'; }
-    if (W.state[c.id] === 'loading') return '<p class="hint">Opening the report…</p>';
+    if (!W.state[c.id]) { load(c.id); return versionBar(c) + '<p class="hint">Opening the report…</p>'; }
+    if (W.state[c.id] === 'loading') return versionBar(c) + '<p class="hint">Opening the report…</p>';
     sync();
     const d = W.docs[c.id];
-    if (W.busy && W.busy.caseId === c.id) return '<div class="card"><h2>Drafting the report</h2><p class="sub" id="ai-progress">' + esc(W.busy.text || 'Sending the case material…') + '</p><p class="hint" style="margin-top:8px">This usually takes a minute or two. You can look at other tabs while it works.</p></div>';
-    if (!d) return '<div class="card"><h2>Write the report</h2><p class="sub">Start with a first version built from this case, then edit it here like any document. The cover, tables, signature lines and photo pages come from the other tabs and stay up to date.</p>' +
-      '<div class="row" style="margin-top:12px"><button class="btn primary big" data-act="ai-draft">Draft it with Claude…</button><button class="btn big" data-act="doc-start">Start from the outline only</button></div>' +
+    if (W.busy && W.busy.caseId === c.id) return versionBar(c) + '<div class="card"><h2>Drafting the report</h2><p class="sub" id="ai-progress">' + esc(W.busy.text || 'Sending the case material…') + '</p><p class="hint" style="margin-top:8px">This usually takes a minute or two. You can look at other tabs while it works.</p></div>';
+    if (!d) return versionBar(c) + '<div class="card"><h2>Write ' + (verOf(c.id) === 1 ? 'the report' : 'Version ' + verOf(c.id) + ' of the report') + '</h2><p class="sub">Start with a first version built from this case, then edit it here like any document. The cover, tables, signature lines and photo pages come from the other tabs and stay up to date.</p>' +
+      '<div class="row" style="margin-top:12px"><button class="btn primary big" data-act="ai-draft">Draft it with Claude…</button><button class="btn big" data-act="doc-start">Start from the outline only</button></div>' + copyOffer(c) +
       '<p class="hint" style="margin-top:8px">Claude writes a first draft of each section from the case’s photos, emails and notes. It is told to write only what that material supports and to leave your opinions for you, marked in [square brackets]. You will see exactly what is sent before anything leaves this Mac.</p></div>' + C.outlineCards(c);
     const q = d.questions || [];
-    return '<div class="edbar"><select class="in" data-block aria-label="Paragraph style" style="width:150px"><option value="p">Body text</option><option value="h2">Heading</option><option value="h3">Subheading</option></select>' +
+    return versionBar(c) + '<div class="edbar"><select class="in" data-block aria-label="Paragraph style" style="width:150px"><option value="p">Body text</option><option value="h2">Heading</option><option value="h3">Subheading</option></select>' +
       '<button class="tb" data-cmd="bold" title="Bold" aria-label="Bold"><b>B</b></button><button class="tb" data-cmd="italic" title="Italic" aria-label="Italic"><i>I</i></button><button class="tb" data-cmd="underline" title="Underline" aria-label="Underline"><u>U</u></button>' +
       '<button class="tb" data-cmd="insertUnorderedList" title="Bulleted list" aria-label="Bulleted list">• List</button><button class="tb" data-cmd="insertOrderedList" title="Numbered list" aria-label="Numbered list">1. List</button>' +
       '<select class="in" data-insert aria-label="Insert" style="width:190px"><option value="">Insert…</option><option value="break">Page break</option><option value="materials">Materials reviewed</option>' + ctxFor(c, r).appraisals.map(a => '<option value="appraisal:' + a.id + '">Appraisal table: ' + esc(A.R.title(a)) + '</option>' + (A.E.compareKeys(a).length ? '<option value="compare:' + a.id + '">Comparison of editions and methods: ' + esc(A.R.title(a)) + '</option>' : '')).join('') +
@@ -133,10 +155,23 @@
     if (ask) { S.modal = { type: 'rebuild' }; A.openModal('<h2>Rebuild from the case?</h2><p class="sub">This replaces the document with a fresh one built from the outline and the text in each section on the outline, as they were last drafted. Your current version is kept, and “More” will offer to go back to it.</p><div class="row end" style="margin-top:14px"><button class="btn" data-act="close-modal">Cancel</button><button class="btn primary" data-act="doc-rebuild-ok">Rebuild</button></div>', true); return; }
     startDoc(r.doc, r); A.closeModal(); A.render(); toast('Rebuilt from the case');
   }
+  async function switchVersion(id, v) {
+    if (W.busy || !S.cases[id] || VERSIONS.indexOf(v) < 0 || verOf(id) === v) return;
+    sync(); await flushDocs();   // the version on screen is written to its own file before the other one opens
+    dropPage(id); W.ver[id] = v; delete W.docs[id]; delete W.state[id]; A.render();
+  }
+  async function copyVersion(id, from) {
+    const r = S.cases[id], v = verOf(id); if (!r || W.busy || from === v) return;
+    const src = await Host.call('caseGet', { path: r.path, name: docName(id, from) }).catch(() => null);
+    if (verOf(id) !== v) return;
+    if (!src || typeof src.html !== 'string') { toast('Version ' + from + ' has nothing in it yet'); return; }
+    W.docs[id] = Object.assign({}, src, { createdAt: Date.now(), previous: null, copiedFrom: from }); W.state[id] = 'ready';
+    dropPage(id); saveDoc(id, 0); A.render(); toast('Version ' + v + ' started as a copy of Version ' + from);
+  }
   function restore() { const r = C.rec(); if (!r) return; sync(); const d = W.docs[r.doc.id]; if (!d || !d.previous) return; const cur = d.html; d.html = d.previous; d.previous = cur; dropPage(r.doc.id); saveDoc(r.doc.id, 0); A.render(); toast('Went back to the earlier version'); }
 
   // ---------- exports ----------
-  const fileBase = c => (c.reportTitle || c.name || 'Report').replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80);
+  const fileBase = c => (c.reportTitle || c.name || 'Report').replace(/[\\/:*?"<>|]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80) + (verOf(c.id) > 1 ? ' - Version ' + verOf(c.id) : '');
   async function exportDoc(kind, b) {
     const r = C.rec(), c = r.doc; sync(); const d = W.docs[c.id]; if (!d) return;
     const old = b.textContent; b.disabled = true; b.textContent = kind === 'pdf' ? 'Making the PDF…' : 'Building…';
@@ -255,6 +290,8 @@
 
   Object.assign(A.ACT, {
     'doc-start': () => { const r = C.rec(); startDoc(r.doc, r); A.render(); },
+    'doc-ver': b => { const r = C.rec(); if (r) switchVersion(r.doc.id, +b.dataset.v); },
+    'doc-copy': b => { const r = C.rec(); if (r) copyVersion(r.doc.id, +b.dataset.v); },
     'doc-rebuild-ok': () => rebuild(false),
     'doc-pdf': b => exportDoc('pdf', b), 'doc-pages': b => exportDoc('pages', b),
     'auto-del': b => { const n = b.closest('[data-auto]'); if (n) { n.remove(); changed(); } },
@@ -447,6 +484,15 @@
     restore(); await flushDocs(); out.andForward = /Drafted /.test(text()) && !/Self test sentence/.test(text());
     rebuild(false); await flushDocs(); out.rebuilt = /Drafted /.test(text()) && /Self test sentence/.test(W.docs[caseId].previous || '') === false && !!W.docs[caseId].previous;
     const onDisk = await Host.call('caseGet', { path: r.path, name: 'report' }); out.diskMatches = !!onDisk && onDisk.html === W.docs[caseId].html && onDisk.html === serialize($('#ed'));
+    // versions: Version 2 starts empty, can start as a copy of Version 1, is saved in its own file, and leaves Version 1 alone
+    const ready = () => new Promise(res => { let n = 0; const t = setInterval(() => { if (W.state[caseId] === 'ready' || ++n > 250) { clearInterval(t); res(); } }, 20); });
+    const v1 = W.docs[caseId].html; await switchVersion(caseId, 2); await ready();
+    out.versionEmpty = verOf(caseId) === 2 && !W.docs[caseId] && !!$('[data-act=doc-copy][data-v="1"]');
+    await copyVersion(caseId, 1); await flushDocs();
+    const v2disk = await Host.call('caseGet', { path: r.path, name: 'report-v2' }), v1disk = await Host.call('caseGet', { path: r.path, name: 'report' });
+    out.versionCopied = !!v2disk && v2disk.html === v1 && !!v1disk && v1disk.html === v1 && !!$('#ed');
+    await switchVersion(caseId, 1); await ready(); A.render();
+    out.versionBack = verOf(caseId) === 1 && !!W.docs[caseId] && W.docs[caseId].html === v1 && /Version 2/.test(($('[data-act=doc-ver][data-v="2"]') || {}).textContent || '') && !/empty/.test(($('[data-act=doc-ver][data-v="2"]') || {}).textContent || '');
     // field notes arrive as photographs: an unmarked photo that turns out to be a page of notes is filed as one, typed up, and read into the table
     const gt = await gatherTrees(c, r); out.treeGather = gt.pages.length + ' pages, ' + gt.photos.length + ' photos at ' + gt.content.filter(b => b.type === 'case_image').map(b => b.max).join(',');
     // the visit date is the day most of the site photos were taken; a page of notes photographed later does not count
@@ -468,5 +514,5 @@
     return out;
   };
 
-  window.WriteUI = { W: W, dropPage: dropPage, saveDoc: saveDoc, keepPages: keepPages, gatherTrees: gatherTrees, addReadTrees: addReadTrees, TREE_SYSTEM: TREE_SYSTEM, TREE_SCHEMA: TREE_SCHEMA, flushDocs: flushDocs, docSections: docSections, SYSTEM: SYSTEM, SCHEMA: SCHEMA, gather: gather, applyDraft: applyDraft, serialize: serialize, clean: clean, ctxFor: ctxFor, startDoc: startDoc, sync: sync };
+  window.WriteUI = { W: W, docName: docName, verOf: verOf, switchVersion: switchVersion, copyVersion: copyVersion, dropPage: dropPage, saveDoc: saveDoc, keepPages: keepPages, gatherTrees: gatherTrees, addReadTrees: addReadTrees, TREE_SYSTEM: TREE_SYSTEM, TREE_SCHEMA: TREE_SCHEMA, flushDocs: flushDocs, docSections: docSections, SYSTEM: SYSTEM, SCHEMA: SCHEMA, gather: gather, applyDraft: applyDraft, serialize: serialize, clean: clean, ctxFor: ctxFor, startDoc: startDoc, sync: sync };
 })();
