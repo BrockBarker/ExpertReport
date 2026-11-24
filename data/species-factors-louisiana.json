@@ -1,0 +1,396 @@
+{
+ "what": "Species factors for Louisiana, for use as the species rating in the 9th-edition Trunk Formula Method.",
+ "chosen_by": "Supplied by the arborist on 2026-11-12 as the species ratings to use for 9th-edition appraisals.",
+ "source": {
+  "citation": "Nowak, David J. 2024. Understanding i-Tree: Summary of programs and methods. Gen. Tech. Rep. NRS-200-2023. Madison, WI: U.S. Department of Agriculture, Forest Service, Northern Research Station. Appendix 7: Compensatory Value of Trees, Table 15 (LA), p. 29.",
+  "doi": "https://doi.org/10.2737/NRS-GTR-200-2023-Appendix7",
+  "url": "https://www.fs.usda.gov/nrs/pubs/gtr/gtr-nrs200-2023_appendixes/gtr_nrs200-2023_appendix7.pdf",
+  "what_the_source_says": "Compensatory value is estimated using Council of Tree and Landscape Appraisers (CTLA 1992) guidelines. The species rating is a number between 0 and 1.00, where 1.00 is the most desirable, and may differ from state to state. The factors were compiled from numerous states for i-Tree Eco. The appendix does not name the publication the Louisiana ratings were taken from.",
+  "checked": "All 75 rows read from the PDF text on 2026-11-12 and compared with the arborist's screenshot: identical."
+ },
+ "louisiana_base_values_from_same_source": {
+  "table": "Table 19, Base dollar values for the United States in U.S. dollars (2000), p. 102",
+  "base_value_usd_per_sq_in": 16.26,
+  "replacement_cost_usd": 940.0,
+  "maximum_transplant_size_in": 6.0,
+  "note": "Year-2000 dollars. Reference only; not used unless the arborist chooses it."
+ },
+ "common_names_note": "Common names were added for look-up and are not from the source. Check them before they appear in a report.",
+ "species": [
+  {
+   "scientific": "Acer negundo",
+   "common": "boxelder",
+   "factor": 0.44
+  },
+  {
+   "scientific": "Acer platanoides",
+   "common": "Norway maple",
+   "factor": 0.4
+  },
+  {
+   "scientific": "Acer rubrum",
+   "common": "red maple",
+   "factor": 0.79
+  },
+  {
+   "scientific": "Acer saccharinum",
+   "common": "silver maple",
+   "factor": 0.2
+  },
+  {
+   "scientific": "Acer saccharum",
+   "common": "sugar maple",
+   "factor": 0.6
+  },
+  {
+   "scientific": "Aesculus glabra",
+   "common": "Ohio buckeye",
+   "factor": 0.6
+  },
+  {
+   "scientific": "Aesculus hippocastanum",
+   "common": "horse chestnut",
+   "factor": 0.4
+  },
+  {
+   "scientific": "Ailanthus altissima",
+   "common": "tree of heaven",
+   "factor": 0.2
+  },
+  {
+   "scientific": "Betula nigra",
+   "common": "river birch",
+   "factor": 0.75
+  },
+  {
+   "scientific": "Carya alba",
+   "common": "mockernut hickory",
+   "factor": 0.74
+  },
+  {
+   "scientific": "Carya aquatica",
+   "common": "water hickory",
+   "factor": 0.78
+  },
+  {
+   "scientific": "Carya cordiformis",
+   "common": "bitternut hickory",
+   "factor": 0.67
+  },
+  {
+   "scientific": "Carya glabra",
+   "common": "pignut hickory",
+   "factor": 0.73
+  },
+  {
+   "scientific": "Carya illinoinensis",
+   "common": "pecan",
+   "factor": 0.74
+  },
+  {
+   "scientific": "Carya ovata",
+   "common": "shagbark hickory",
+   "factor": 0.72
+  },
+  {
+   "scientific": "Cedrus atlantica",
+   "common": "Atlas cedar",
+   "factor": 1.0
+  },
+  {
+   "scientific": "Cedrus deodara",
+   "common": "deodar cedar",
+   "factor": 0.64
+  },
+  {
+   "scientific": "Celtis laevigata",
+   "common": "sugarberry",
+   "factor": 0.68
+  },
+  {
+   "scientific": "Celtis occidentalis",
+   "common": "common hackberry",
+   "factor": 0.6
+  },
+  {
+   "scientific": "Cryptomeria japonica",
+   "common": "Japanese cedar",
+   "factor": 0.4
+  },
+  {
+   "scientific": "Fagus grandifolia",
+   "common": "American beech",
+   "factor": 0.77
+  },
+  {
+   "scientific": "Fagus sylvatica",
+   "common": "European beech",
+   "factor": 1.0
+  },
+  {
+   "scientific": "Fraxinus americana",
+   "common": "white ash",
+   "factor": 0.6
+  },
+  {
+   "scientific": "Fraxinus pennsylvanica",
+   "common": "green ash",
+   "factor": 0.58
+  },
+  {
+   "scientific": "Ginkgo biloba",
+   "common": "ginkgo",
+   "factor": 1.0
+  },
+  {
+   "scientific": "Gleditsia triacanthos",
+   "common": "honeylocust",
+   "factor": 0.74
+  },
+  {
+   "scientific": "Juglans nigra",
+   "common": "black walnut",
+   "factor": 0.77
+  },
+  {
+   "scientific": "Juniperus virginiana",
+   "common": "eastern redcedar",
+   "factor": 0.6
+  },
+  {
+   "scientific": "Liquidambar styraciflua",
+   "common": "sweetgum",
+   "factor": 0.72
+  },
+  {
+   "scientific": "Liriodendron tulipifera",
+   "common": "tulip poplar",
+   "factor": 0.69
+  },
+  {
+   "scientific": "Magnolia acuminata",
+   "common": "cucumber tree",
+   "factor": 0.8
+  },
+  {
+   "scientific": "Magnolia grandiflora",
+   "common": "southern magnolia",
+   "factor": 0.75
+  },
+  {
+   "scientific": "Nyssa sylvatica",
+   "common": "black gum",
+   "factor": 0.8
+  },
+  {
+   "scientific": "Pinus echinata",
+   "common": "shortleaf pine",
+   "factor": 0.59
+  },
+  {
+   "scientific": "Pinus elliottii",
+   "common": "slash pine",
+   "factor": 0.6
+  },
+  {
+   "scientific": "Pinus palustris",
+   "common": "longleaf pine",
+   "factor": 0.89
+  },
+  {
+   "scientific": "Pinus strobus",
+   "common": "eastern white pine",
+   "factor": 0.8
+  },
+  {
+   "scientific": "Pinus taeda",
+   "common": "loblolly pine",
+   "factor": 0.82
+  },
+  {
+   "scientific": "Platanus occidentalis",
+   "common": "American sycamore",
+   "factor": 0.62
+  },
+  {
+   "scientific": "Populus deltoides",
+   "common": "eastern cottonwood",
+   "factor": 0.65
+  },
+  {
+   "scientific": "Populus heterophylla",
+   "common": "swamp cottonwood",
+   "factor": 0.2
+  },
+  {
+   "scientific": "Prunus serotina",
+   "common": "black cherry",
+   "factor": 0.53
+  },
+  {
+   "scientific": "Quercus alba",
+   "common": "white oak",
+   "factor": 0.77
+  },
+  {
+   "scientific": "Quercus coccinea",
+   "common": "scarlet oak",
+   "factor": 1.0
+  },
+  {
+   "scientific": "Quercus falcata",
+   "common": "southern red oak",
+   "factor": 0.78
+  },
+  {
+   "scientific": "Quercus imbricaria",
+   "common": "shingle oak",
+   "factor": 0.8
+  },
+  {
+   "scientific": "Quercus laurifolia",
+   "common": "laurel oak",
+   "factor": 0.78
+  },
+  {
+   "scientific": "Quercus lyrata",
+   "common": "overcup oak",
+   "factor": 0.91
+  },
+  {
+   "scientific": "Quercus macrocarpa",
+   "common": "bur oak",
+   "factor": 1.0
+  },
+  {
+   "scientific": "Quercus marilandica",
+   "common": "blackjack oak",
+   "factor": 0.54
+  },
+  {
+   "scientific": "Quercus michauxii",
+   "common": "swamp chestnut oak",
+   "factor": 0.76
+  },
+  {
+   "scientific": "Quercus nigra",
+   "common": "water oak",
+   "factor": 0.68
+  },
+  {
+   "scientific": "Quercus palustris",
+   "common": "pin oak",
+   "factor": 0.4
+  },
+  {
+   "scientific": "Quercus phellos",
+   "common": "willow oak",
+   "factor": 0.83
+  },
+  {
+   "scientific": "Quercus rubra",
+   "common": "northern red oak",
+   "factor": 0.4
+  },
+  {
+   "scientific": "Quercus shumardii",
+   "common": "Shumard oak",
+   "factor": 0.87
+  },
+  {
+   "scientific": "Quercus stellata",
+   "common": "post oak",
+   "factor": 0.54
+  },
+  {
+   "scientific": "Quercus velutina",
+   "common": "black oak",
+   "factor": 0.53
+  },
+  {
+   "scientific": "Quercus virginiana",
+   "common": "live oak",
+   "factor": 0.92
+  },
+  {
+   "scientific": "Robinia pseudoacacia",
+   "common": "black locust",
+   "factor": 0.2
+  },
+  {
+   "scientific": "Salix nigra",
+   "common": "black willow",
+   "factor": 0.64
+  },
+  {
+   "scientific": "Salix x sepulcralis Simonkai",
+   "common": "weeping willow",
+   "factor": 0.6
+  },
+  {
+   "scientific": "Taxodium distichum",
+   "common": "bald cypress",
+   "factor": 0.82
+  },
+  {
+   "scientific": "Tilia cordata",
+   "common": "littleleaf linden",
+   "factor": 0.8
+  },
+  {
+   "scientific": "Tsuga canadensis",
+   "common": "eastern hemlock",
+   "factor": 0.8
+  },
+  {
+   "scientific": "Ulmus alata",
+   "common": "winged elm",
+   "factor": 0.75
+  },
+  {
+   "scientific": "Ulmus americana",
+   "common": "American elm",
+   "factor": 0.6
+  },
+  {
+   "scientific": "Ulmus crassifolia",
+   "common": "cedar elm",
+   "factor": 0.6
+  },
+  {
+   "scientific": "Ulmus glabra",
+   "common": "Wych elm",
+   "factor": 0.6
+  },
+  {
+   "scientific": "Ulmus parvifolia",
+   "common": "Chinese elm",
+   "factor": 0.6
+  },
+  {
+   "scientific": "Ulmus procera",
+   "common": "English elm",
+   "factor": 0.6
+  },
+  {
+   "scientific": "Ulmus pumila",
+   "common": "Siberian elm",
+   "factor": 0.2
+  },
+  {
+   "scientific": "Ulmus rubra",
+   "common": "slippery elm",
+   "factor": 0.6
+  },
+  {
+   "scientific": "Ulmus serotina",
+   "common": "September elm",
+   "factor": 0.6
+  },
+  {
+   "scientific": "Ulmus thomasii",
+   "common": "rock elm",
+   "factor": 0.6
+  }
+ ]
+}

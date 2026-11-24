@@ -1,0 +1,21 @@
+{
+ "supplier": "Wilkinson Tree Farm",
+ "address": "Iowa, Louisiana",
+ "title": "Prices for Field-Grown Trees",
+ "date": "as reproduced in a November 2025 report",
+ "price_basis": "Field-grown trees priced by trunk diameter. The 2023 and 2025 reports describe these prices as delivered and planted. Confirm with the supplier before relying on that.",
+ "source_file": "Appendix B of the November 2025 tree damage report",
+ "notes": "Copied from the price sheet reproduced in the report appendix. The sheet lists one price per trunk diameter for field-grown shade trees and does not price each species separately.",
+ "items": [
+  {"category": "Field-grown trees", "variety": "Field-grown shade tree", "height": "10-14'", "caliper_in": "4", "price_usd": 900},
+  {"category": "Field-grown trees", "variety": "Field-grown shade tree", "height": "10-14'", "caliper_in": "4.5", "price_usd": 1250},
+  {"category": "Field-grown trees", "variety": "Field-grown shade tree", "height": "12-14'", "caliper_in": "5", "price_usd": 1500},
+  {"category": "Field-grown trees", "variety": "Field-grown shade tree", "height": "14-16'", "caliper_in": "5.5", "price_usd": 1750},
+  {"category": "Field-grown trees", "variety": "Field-grown shade tree", "height": "14-18'", "caliper_in": "6", "price_usd": 2000},
+  {"category": "Field-grown trees", "variety": "Field-grown shade tree", "height": "16-18'", "caliper_in": "6.5", "price_usd": 2500},
+  {"category": "Field-grown trees", "variety": "Field-grown shade tree", "height": "16-20'", "caliper_in": "7", "price_usd": 3500},
+  {"category": "Field-grown trees", "variety": "Field-grown shade tree", "height": "16-20'", "caliper_in": "7.5", "price_usd": 4000},
+  {"category": "Field-grown trees", "variety": "Field-grown shade tree", "height": "18-20'", "caliper_in": "8", "price_usd": 5000},
+  {"category": "Field-grown trees", "variety": "Field-grown shade tree", "height": "22-25'", "caliper_in": "9-10", "price_usd": 7500}
+ ]
+}
